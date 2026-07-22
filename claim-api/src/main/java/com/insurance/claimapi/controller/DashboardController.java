@@ -23,7 +23,7 @@ public class DashboardController {
     private final ClaimService claimService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasAnyRole('ADJUSTER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get dashboard statistics", description = "Get claim statistics for dashboard")
     public ResponseEntity<ApiResponse<DashboardStats>> getDashboardStats() {
         DashboardStats stats = claimService.getDashboardStats();
