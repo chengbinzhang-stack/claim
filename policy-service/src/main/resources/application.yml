@@ -1,17 +1,21 @@
 server:
-  port: 8083
+  port: ${PORT:8083}
 
 spring:
   application:
     name: policy-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/insurance_claim_db
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/insurance_claim_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
 
 logging:
   level:
