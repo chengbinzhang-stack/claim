@@ -4,4 +4,6 @@ import com.insurance.claimapi.dto.*;
 
 public interface AuthService {
     LoginResponse login(LoginRequest request);
+
+    LoginResponse register(RegisterRequest request);
 }

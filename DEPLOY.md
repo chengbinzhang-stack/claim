@@ -53,7 +53,7 @@ Repeat steps above with:
 After backend is deployed, update `react-web/src/services/api.ts`:
 
 ```typescript
-const API_BASE_URL = 'https://claim-api.onrender.com'; // Your actual URL
+const API_BASE_URL = 'https://claim-api-7mi9.onrender.com'; // Your actual URL
 ```
 
 ## Step 5: Deploy Frontend to Vercel

@@ -1,8 +1,6 @@
 package com.insurance.claimapi.client;
 
-import com.insurance.claimapi.dto.EmailRequest;
 import com.insurance.claimapi.dto.PolicyDto;
-import com.insurance.claimapi.service.NotificationServiceClient;
 import com.insurance.claimapi.service.PolicyServiceClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;

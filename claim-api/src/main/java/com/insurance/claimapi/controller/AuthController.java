@@ -23,4 +23,11 @@ public class AuthController {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Login successful"));
     }
+
+    @PostMapping("/register")
+    @Operation(summary = "User registration", description = "Register a new user account")
+    public ResponseEntity<ApiResponse<LoginResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        LoginResponse response = authService.register(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Registration successful"));
+    }
 }
