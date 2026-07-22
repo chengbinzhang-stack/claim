@@ -18,7 +18,6 @@ const LoginPage: React.FC = () => {
     try {
       const response = await authService.login(username, password);
       const loginData = response.data;
-      alert(JSON.stringify(loginData, null, 2));
       if (!loginData.data?.token) {
         setError('Invalid response: ' + JSON.stringify(loginData));
         return;
@@ -27,6 +26,7 @@ const LoginPage: React.FC = () => {
       localStorage.setItem('user', JSON.stringify(loginData.data.user));
       navigate('/dashboard');
     } catch (err: any) {
+      alert('Login error: ' + JSON.stringify(err.response?.data || err.message || err));
       setError(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
