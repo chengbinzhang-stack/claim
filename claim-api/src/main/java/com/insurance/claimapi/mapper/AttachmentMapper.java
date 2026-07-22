@@ -14,8 +14,6 @@ public interface AttachmentMapper {
     AttachmentMapper INSTANCE = Mappers.getMapper(AttachmentMapper.class);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "claim", ignore = true)
-    @Mapping(target = "uploadedAt", ignore = true)
     AttachmentDto toDto(ClaimAttachment attachment);
 
     List<AttachmentDto> toDtoList(List<ClaimAttachment> attachments);
