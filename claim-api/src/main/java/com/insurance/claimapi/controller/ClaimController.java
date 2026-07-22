@@ -3,16 +3,15 @@ package com.insurance.claimapi.controller;
 import java.util.List;
 
 import com.insurance.claimapi.dto.*;
-import com.insurance.claimapi.entity.Claim;
 import com.insurance.claimapi.entity.User;
 import com.insurance.claimapi.repository.UserRepository;
 import com.insurance.claimapi.service.ClaimService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Grid } from '@mui/material';
+import { Box, Typography, Paper, Grid, Button } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardService } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
+
+const getUserRole = (): string | null => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return null;
+  try { return JSON.parse(userStr).roleName || null; } catch { return null; }
+};
 
 const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const role = getUserRole();
 
   useEffect(() => {
     loadStats();
@@ -34,7 +43,14 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Box p={3}>
-      <Typography variant="h5" gutterBottom>Dashboard</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h5">Dashboard</Typography>
+        {(role === 'ADJUSTER' || role === 'ADMIN') && (
+          <Button variant="outlined" onClick={() => navigate('/adjuster/claims')}>
+            Adjuster View
+          </Button>
+        )}
+      </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={3}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>

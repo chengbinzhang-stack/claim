@@ -38,6 +38,8 @@ export const authService = {
 export const claimService = {
   getMyClaims: (page = 0, size = 10) =>
     api.get(`/claims/my?page=${page}&size=${size}`),
+  getAllClaims: (page = 0, size = 100) =>
+    api.get(`/claims/all?page=${page}&size=${size}`),
   getClaimById: (id: number) =>
     api.get(`/claims/${id}`),
   submitClaim: (data: any) =>
