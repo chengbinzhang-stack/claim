@@ -1,0 +1,79 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: claim-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/insurance_claim_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: UTC
+
+# JWT Configuration
+jwt:
+  secret: YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY3ODkwYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=
+  expiration: 86400000  # 24 hours in milliseconds
+
+# OpenFeign Configuration
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 5000
+        logger-level: basic
+      policy-service:
+        url: http://localhost:8083
+      notification-service:
+        url: http://localhost:8084
+  circuitbreaker:
+    enabled: true
+    fallback:
+      enabled: true
+
+# Spring Cloud Circuit Breaker
+spring-cloud:
+  circuitbreaker:
+    resilience4j:
+      enabled: true
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# Logging
+logging:
+  level:
+    com.insurance: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
