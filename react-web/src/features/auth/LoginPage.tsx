@@ -17,11 +17,14 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await authService.login(username, password);
-      console.log('Login response:', response.data);
-      const { data } = response.data;
-      console.log('Login data:', data);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      const loginData = response.data;
+      alert(JSON.stringify(loginData, null, 2));
+      if (!loginData.data?.token) {
+        setError('Invalid response: ' + JSON.stringify(loginData));
+        return;
+      }
+      localStorage.setItem('token', loginData.data.token);
+      localStorage.setItem('user', JSON.stringify(loginData.data.user));
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
