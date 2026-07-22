@@ -68,9 +68,9 @@ public class ClaimServiceImpl implements ClaimService {
                 .build();
 
         // Set relations
-        Policy policy = policyRepository.findByPolicyNumber(request.getPolicyNumber())
+        Policy dbPolicy = policyRepository.findByPolicyNumber(request.getPolicyNumber())
                 .orElseThrow(() -> new PolicyNotFoundException("Policy not found: " + request.getPolicyNumber()));
-        claim.setPolicy(policy);
+        claim.setPolicy(dbPolicy);
         claim.setSubmittedBy(user);
 
         Claim savedClaim = claimRepository.save(claim);
