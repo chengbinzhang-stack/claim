@@ -32,6 +32,18 @@ public class JwtTokenProvider {
         return generateToken(userDetails.getUsername());
     }
 
+    public String generateToken(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
     public String generateToken(com.insurance.claimapi.entity.User user) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
