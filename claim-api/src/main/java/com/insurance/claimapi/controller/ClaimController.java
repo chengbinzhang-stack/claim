@@ -1,5 +1,7 @@
 package com.insurance.claimapi.controller;
 
+import java.util.List;
+
 import com.insurance.claimapi.dto.*;
 import com.insurance.claimapi.entity.Claim;
 import com.insurance.claimapi.entity.User;
@@ -44,7 +46,7 @@ public class ClaimController {
 
     @GetMapping("/my")
     @Operation(summary = "Get my claims", description = "Get all claims for the current user")
-    public ResponseEntity<ApiResponse<ClaimDto>> getMyClaims(
+    public ResponseEntity<ApiResponse<List<ClaimDto>>> getMyClaims(
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -87,7 +89,7 @@ public class ClaimController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADJUSTER', 'ADMIN')")
     @Operation(summary = "Get all claims", description = "Get all claims with optional filters (Admin/Adjuster only)")
-    public ResponseEntity<ApiResponse<ClaimDto>> getAllClaims(
+    public ResponseEntity<ApiResponse<List<ClaimDto>>> getAllClaims(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String claimNumber,
             @RequestParam(required = false) String fromDate,
