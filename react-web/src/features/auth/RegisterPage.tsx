@@ -1,33 +1,41 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography, Alert, Card, CardContent } from '@mui/material';
+import { TextField, Button, Box, Typography, Alert, Card, CardContent, Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../../services/api';
+import axios from 'axios';
 
-const LoginPage: React.FC = () => {
+const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:8082';
+
+const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const response = await authService.login(username, password);
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+        username,
+        password,
+        email,
+        fullName,
+      });
       const loginData = response.data;
       if (!loginData.data?.token) {
-        setError('Invalid response: ' + JSON.stringify(loginData));
+        setError('Invalid response');
         return;
       }
       localStorage.setItem('token', loginData.data.token);
       localStorage.setItem('user', JSON.stringify(loginData.data.user));
       navigate('/dashboard');
     } catch (err: any) {
-      alert('Login error: ' + JSON.stringify(err.response?.data || err.message || err));
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -38,15 +46,15 @@ const LoginPage: React.FC = () => {
       <Card sx={{ maxWidth: 400, p: 2 }}>
         <CardContent>
           <Typography variant="h5" component="h1" gutterBottom textAlign="center">
-            Insurance Claim System
+            Register
           </Typography>
           <Typography variant="body2" color="textSecondary" textAlign="center" mb={3}>
-            Sign in to continue
+            Create your account
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleRegister}>
             <TextField
               fullWidth
               label="Username"
@@ -64,6 +72,23 @@ const LoginPage: React.FC = () => {
               margin="normal"
               required
             />
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Full Name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              margin="normal"
+              required
+            />
             <Button
               type="submit"
               fullWidth
@@ -71,13 +96,13 @@ const LoginPage: React.FC = () => {
               sx={{ mt: 3 }}
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Registering...' : 'Register'}
             </Button>
           </form>
 
           <Box mt={2} textAlign="center">
-            <Link href="/register" underline="hover" variant="body2">
-              Don't have an account? Register
+            <Link href="/login" underline="hover" variant="body2">
+              Already have an account? Sign in
             </Link>
           </Box>
         </CardContent>
@@ -86,4 +111,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

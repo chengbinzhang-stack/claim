@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
 import LoginPage from './features/auth/LoginPage';
+import RegisterPage from './features/auth/RegisterPage';
 import ClaimsListPage from './features/claims/ClaimsListPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 
@@ -16,6 +17,7 @@ const App: React.FC = () => {
       <CssBaseline />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/claims" element={<ProtectedRoute><ClaimsListPage /></ProtectedRoute>} />
         <Route path="/claims/:id" element={<ProtectedRoute><ClaimsListPage /></ProtectedRoute>} />
