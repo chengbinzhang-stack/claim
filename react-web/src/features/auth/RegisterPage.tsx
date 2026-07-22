@@ -3,7 +3,7 @@ import { TextField, Button, Box, Typography, Alert, Card, CardContent, Link } fr
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:8082';
+const API_BASE_URL = ((import.meta.env as any).VITE_API_URL || 'http://localhost:8082').replace(/\/$/, '');
 
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
