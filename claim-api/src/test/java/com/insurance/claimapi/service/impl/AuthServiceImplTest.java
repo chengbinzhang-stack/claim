@@ -114,10 +114,7 @@ class AuthServiceImplTest {
     @Test
     @DisplayName("register - success")
     void register_success() {
-        RegisterRequest request = RegisterRequest.builder()
-                .username("newuser").password("password123")
-                .email("new@example.com").fullName("New User")
-                .build();
+        RegisterRequest request = new RegisterRequest("newuser", "password123", "new@example.com", "New User");
 
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
@@ -144,10 +141,7 @@ class AuthServiceImplTest {
     @Test
     @DisplayName("register - duplicate username throws AuthenticationException")
     void register_duplicateUsername() {
-        RegisterRequest request = RegisterRequest.builder()
-                .username("existinguser").password("password123")
-                .email("new@example.com")
-                .build();
+        RegisterRequest request = new RegisterRequest("existinguser", "password123", "new@example.com", "New Name");
 
         when(userRepository.findByUsername("existinguser")).thenReturn(Optional.of(testUser));
 
@@ -157,10 +151,7 @@ class AuthServiceImplTest {
     @Test
     @DisplayName("register - duplicate email throws AuthenticationException")
     void register_duplicateEmail() {
-        RegisterRequest request = RegisterRequest.builder()
-                .username("newuser").password("password123")
-                .email("test@example.com")
-                .build();
+        RegisterRequest request = new RegisterRequest("newuser", "password123", "test@example.com", null);
 
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
