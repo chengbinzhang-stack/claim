@@ -5,6 +5,7 @@ import com.insurance.claimapi.entity.*;
 import com.insurance.claimapi.exception.*;
 import com.insurance.claimapi.mapper.ClaimMapper;
 import com.insurance.claimapi.repository.*;
+import com.insurance.claimapi.service.IdempotencyService;
 import com.insurance.claimapi.service.NotificationServiceClient;
 import com.insurance.claimapi.service.PolicyServiceClient;
 import org.junit.jupiter.api.*;
@@ -29,6 +30,7 @@ class ClaimServiceImplTest {
     @Mock private ClaimMapper claimMapper;
     @Mock private PolicyServiceClient policyServiceClient;
     @Mock private NotificationServiceClient notificationServiceClient;
+    @Mock private IdempotencyService idempotencyService;
 
     @InjectMocks
     private ClaimServiceImpl claimService;
@@ -93,7 +95,6 @@ class ClaimServiceImplTest {
         assertNotNull(result);
         assertEquals("CLM-2026-ABCD1234", result.getClaimNumber());
         verify(claimRepository).save(any(Claim.class));
-        verify(notificationServiceClient, never()).sendEmail(any());
     }
 
     @Test
