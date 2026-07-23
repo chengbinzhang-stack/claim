@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Grid, Button } from '@mui/material';
+import { Box, Typography, Paper, Grid, Button, Avatar, Chip } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -8,11 +8,17 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState<string | null>(() => {
+  const [user, setUser] = useState<any>(() => {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
-    try { return JSON.parse(userStr).roleName || null; } catch { return null; }
+    try { return JSON.parse(userStr); } catch { return null; }
   });
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   useEffect(() => {
     loadStats();
@@ -42,15 +48,26 @@ const DashboardPage: React.FC = () => {
   return (
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5">Dashboard</Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography variant="h5">Dashboard</Typography>
+          {user && (
+            <Chip
+              size="small"
+              label={user.roleName || user.fullName || user.username}
+              color="primary"
+              variant="outlined"
+            />
+          )}
+        </Box>
         <Box display="flex" gap={1}>
           <Button variant="outlined" onClick={() => navigate('/claims')}>My Claims</Button>
           <Button variant="contained" onClick={() => navigate('/claims/new')}>Submit Claim</Button>
-          {(role === 'ADJUSTER' || role === 'ADMIN') && (
+          {(user?.roleName === 'ADJUSTER' || user?.roleName === 'ADMIN') && (
             <Button variant="outlined" color="warning" onClick={() => navigate('/adjuster/claims')}>
               Adjuster View
             </Button>
           )}
+          <Button variant="text" color="error" onClick={handleLogout}>Logout</Button>
         </Box>
       </Box>
       <Grid container spacing={3}>
