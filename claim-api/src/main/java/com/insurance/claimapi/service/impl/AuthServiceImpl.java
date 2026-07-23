@@ -3,7 +3,6 @@ package com.insurance.claimapi.service.impl;
 import com.insurance.claimapi.dto.*;
 import com.insurance.claimapi.entity.User;
 import com.insurance.claimapi.exception.AuthenticationException;
-import com.insurance.claimapi.exception.ResourceNotFoundException;
 import com.insurance.claimapi.mapper.UserMapper;
 import com.insurance.claimapi.repository.RoleRepository;
 import com.insurance.claimapi.repository.UserRepository;

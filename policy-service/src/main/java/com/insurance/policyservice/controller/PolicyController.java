@@ -1,7 +1,6 @@
 package com.insurance.policyservice.controller;
 
 import com.insurance.policyservice.dto.PolicyDto;
-import com.insurance.policyservice.entity.Policy;
 import com.insurance.policyservice.repository.PolicyRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

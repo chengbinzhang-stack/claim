@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.insurance.claimapi.dto.*;
 import com.insurance.claimapi.entity.User;
-import com.insurance.claimapi.repository.UserRepository;
 import com.insurance.claimapi.service.ClaimService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,8 +29,6 @@ import org.springframework.web.bind.annotation.*;
 public class ClaimController {
 
     private final ClaimService claimService;
-    private final UserRepository userRepository;
-
     @PostMapping
     @Operation(summary = "Submit a new claim", description = "Submit a new insurance claim")
     public ResponseEntity<ApiResponse<ClaimDto>> submitClaim(

@@ -12,5 +12,6 @@ public interface PolicyMapper {
     PolicyMapper INSTANCE = Mappers.getMapper(PolicyMapper.class);
 
     @Mapping(target = "active", expression = "java(policy.isActive())")
+    @Mapping(target = "customerId", source = "customer.id")
     PolicyDto toDto(Policy policy);
 }

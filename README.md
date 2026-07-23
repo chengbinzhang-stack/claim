@@ -116,3 +116,7 @@ Swagger UI available at:
 - Dashboard with statistics chart
 - Responsive React Web UI
 - React Native Mobile App
+
+##Integration test
+cd c:\Users\85007\claim\insurance-demo\claim-api
+mvn test -Dtest=ClaimControllerIntegrationTest -Dspring.profiles.active=test

@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class PolicyServiceClientImpl implements PolicyServiceClient {
 
-    // In a real implementation, this would be injected via OpenFeign
-    // For now, we return a mock implementation for demonstration
-    private PolicyDto mockPolicy;
-
     @Override
     @CircuitBreaker(name = "policyService", fallbackMethod = "getPolicyFallback")
     @Retry(name = "policyService")

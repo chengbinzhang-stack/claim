@@ -3,6 +3,7 @@ package com.insurance.claimapi.controller;
 import com.insurance.claimapi.dto.*;
 import com.insurance.claimapi.entity.*;
 import com.insurance.claimapi.repository.*;
+import com.insurance.claimapi.security.JwtTokenProvider;
 import com.insurance.claimapi.service.NotificationServiceClient;
 import com.insurance.claimapi.service.PolicyServiceClient;
 import org.junit.jupiter.api.*;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +19,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 @SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
 class ClaimControllerIntegrationTest {
 
@@ -32,11 +35,14 @@ class ClaimControllerIntegrationTest {
     @Autowired private RoleRepository roleRepository;
     @Autowired private ClaimRepository claimRepository;
     @Autowired private PolicyRepository policyRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtTokenProvider jwtTokenProvider;
 
     @MockBean private PolicyServiceClient policyServiceClient;
     @MockBean private NotificationServiceClient notificationServiceClient;
 
     private User customerUser;
+    private User adjusterUser;
     private Role customerRole;
     private Role adjusterRole;
     private Policy testPolicy;
@@ -49,9 +55,14 @@ class ClaimControllerIntegrationTest {
         adjusterRole = roleRepository.findByName("ADJUSTER").orElseGet(() ->
                 roleRepository.save(Role.builder().name("ADJUSTER").description("Adjuster").build()));
 
+        // 密码用 BCrypt 编码，登录时需要明文 "password123"
         customerUser = userRepository.save(User.builder()
-                .username("customer1").password("encoded").email("customer@test.com")
+                .username("customer1").password(passwordEncoder.encode("password123")).email("customer@test.com")
                 .fullName("Customer One").role(customerRole).enabled(true).build());
+
+        adjusterUser = userRepository.save(User.builder()
+                .username("adjuster1").password(passwordEncoder.encode("password123")).email("adjuster@test.com")
+                .fullName("Adjuster One").role(adjusterRole).enabled(true).build());
 
         testPolicy = policyRepository.save(Policy.builder()
                 .policyNumber("POL-TEST-001")
@@ -73,6 +84,17 @@ class ClaimControllerIntegrationTest {
         userRepository.deleteAll();
     }
 
+    /**
+     * 辅助方法：用真实 JWT token 认证
+     */
+    private String getCustomerToken() {
+        return jwtTokenProvider.generateToken(customerUser);
+    }
+
+    private String getAdjusterToken() {
+        return jwtTokenProvider.generateToken(adjusterUser);
+    }
+
     @Test
     @DisplayName("POST /claims - unauthenticated returns 403")
     void submitClaim_unauthenticated() throws Exception {
@@ -83,7 +105,6 @@ class ClaimControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("POST /claims - customer submits claim successfully")
     void submitClaim_success() throws Exception {
         PolicyDto mockPolicy = PolicyDto.builder()
@@ -94,6 +115,7 @@ class ClaimControllerIntegrationTest {
         String requestBody = "{\"policyNumber\": \"POL-TEST-001\", \"claimType\": \"ACCIDENT\", \"incidentDate\": \"" + LocalDate.now().minusDays(1).toString() + "\", \"description\": \"Car accident on highway ramp\", \"amount\": 5000.00}";
 
         mockMvc.perform(post("/claims")
+                        .header("Authorization", "Bearer " + getCustomerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isCreated())
@@ -103,12 +125,12 @@ class ClaimControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("POST /claims - validation errors return 400")
     void submitClaim_validationError() throws Exception {
         String requestBody = "{\"policyNumber\": \"\", \"claimType\": \"\", \"incidentDate\": null, \"description\": \"short\", \"amount\": -100}";
 
         mockMvc.perform(post("/claims")
+                        .header("Authorization", "Bearer " + getCustomerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
@@ -117,7 +139,6 @@ class ClaimControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("GET /claims/my - returns only user's claims")
     void getMyClaims_success() throws Exception {
         Claim claim = Claim.builder()
@@ -128,7 +149,8 @@ class ClaimControllerIntegrationTest {
                 .build();
         claimRepository.save(claim);
 
-        mockMvc.perform(get("/claims/my"))
+        mockMvc.perform(get("/claims/my")
+                        .header("Authorization", "Bearer " + getCustomerToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data", hasSize(1)))
@@ -136,7 +158,6 @@ class ClaimControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("GET /claims/{id} - returns claim details")
     void getClaimById_success() throws Exception {
         Claim claim = Claim.builder()
@@ -147,23 +168,23 @@ class ClaimControllerIntegrationTest {
                 .build();
         Claim saved = claimRepository.save(claim);
 
-        mockMvc.perform(get("/claims/{id}", saved.getId()))
+        mockMvc.perform(get("/claims/{id}", saved.getId())
+                        .header("Authorization", "Bearer " + getCustomerToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.claimNumber").value("CLM-TEST-002"));
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("GET /claims/{id} - not found returns 404")
     void getClaimById_notFound() throws Exception {
-        mockMvc.perform(get("/claims/{id}", 99999))
+        mockMvc.perform(get("/claims/{id}", 99999)
+                        .header("Authorization", "Bearer " + getCustomerToken()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false));
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("PUT /claims/{id}/status - customer cannot approve claims (403)")
     void updateStatus_customerForbidden() throws Exception {
         Claim claim = Claim.builder()
@@ -177,13 +198,13 @@ class ClaimControllerIntegrationTest {
         String body = "{\"status\": \"APPROVED\", \"reviewNotes\": \"Approved\"}";
 
         mockMvc.perform(put("/claims/{id}/status", saved.getId())
+                        .header("Authorization", "Bearer " + getCustomerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("PUT /claims/{id}/status - customer cannot reject claims (403)")
     void updateStatus_customerRejectForbidden() throws Exception {
         Claim claim = Claim.builder()
@@ -197,19 +218,15 @@ class ClaimControllerIntegrationTest {
         String body = "{\"status\": \"REJECTED\", \"reviewNotes\": \"Rejected\"}";
 
         mockMvc.perform(put("/claims/{id}/status", saved.getId())
+                        .header("Authorization", "Bearer " + getCustomerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(username = "adjuster1", roles = {"ADJUSTER"})
     @DisplayName("PUT /claims/{id}/status - adjuster can approve claim")
     void updateStatus_adjusterApprove() throws Exception {
-        User adjuster = userRepository.save(User.builder()
-                .username("adjuster1").password("encoded").email("adjuster@test.com")
-                .fullName("Adjuster One").role(adjusterRole).enabled(true).build());
-
         Claim claim = Claim.builder()
                 .claimNumber("CLM-TEST-004").claimType("ACCIDENT")
                 .incidentDate(LocalDate.now().minusDays(1)).description("Test")
@@ -221,6 +238,7 @@ class ClaimControllerIntegrationTest {
         String body = "{\"status\": \"APPROVED\", \"reviewNotes\": \"Looks good, approved.\"}";
 
         mockMvc.perform(put("/claims/{id}/status", saved.getId())
+                        .header("Authorization", "Bearer " + getAdjusterToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -230,13 +248,8 @@ class ClaimControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "adjuster1", roles = {"ADJUSTER"})
     @DisplayName("PUT /claims/{id}/status - adjuster can reject claim")
     void updateStatus_adjusterReject() throws Exception {
-        User adjuster = userRepository.save(User.builder()
-                .username("adjuster2").password("encoded").email("adjuster2@test.com")
-                .fullName("Adjuster Two").role(adjusterRole).enabled(true).build());
-
         Claim claim = Claim.builder()
                 .claimNumber("CLM-TEST-005").claimType("FIRE")
                 .incidentDate(LocalDate.now().minusDays(1)).description("Test")
@@ -248,6 +261,7 @@ class ClaimControllerIntegrationTest {
         String body = "{\"status\": \"REJECTED\", \"reviewNotes\": \"Insufficient evidence.\"}";
 
         mockMvc.perform(put("/claims/{id}/status", saved.getId())
+                        .header("Authorization", "Bearer " + getAdjusterToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -255,21 +269,16 @@ class ClaimControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "customer1", roles = {"CUSTOMER"})
     @DisplayName("GET /claims/all - customer cannot access (403)")
     void getAllClaims_customerForbidden() throws Exception {
-        mockMvc.perform(get("/claims/all"))
+        mockMvc.perform(get("/claims/all")
+                        .header("Authorization", "Bearer " + getCustomerToken()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(username = "adjuster1", roles = {"ADJUSTER"})
     @DisplayName("GET /claims/all - adjuster can access all claims")
     void getAllClaims_adjusterSuccess() throws Exception {
-        User adjuster = userRepository.save(User.builder()
-                .username("adjuster3").password("encoded").email("adjuster3@test.com")
-                .fullName("Adjuster Three").role(adjusterRole).enabled(true).build());
-
         Claim claim1 = Claim.builder()
                 .claimNumber("CLM-TEST-006").claimType("ACCIDENT")
                 .incidentDate(LocalDate.now().minusDays(1)).description("Test1")
@@ -278,7 +287,8 @@ class ClaimControllerIntegrationTest {
                 .build();
         claimRepository.save(claim1);
 
-        mockMvc.perform(get("/claims/all"))
+        mockMvc.perform(get("/claims/all")
+                        .header("Authorization", "Bearer " + getAdjusterToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(1))));
