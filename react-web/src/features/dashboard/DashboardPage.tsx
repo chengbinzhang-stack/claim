@@ -51,12 +51,10 @@ const DashboardPage: React.FC = () => {
         <Box display="flex" alignItems="center" gap={1}>
           <Typography variant="h5">Dashboard</Typography>
           {user && (
-            <Chip
-              size="small"
-              label={user.roleName || user.fullName || user.username}
-              color="primary"
-              variant="outlined"
-            />
+            <>
+              <Chip size="small" label={user.fullName || user.username} color="primary" variant="outlined" />
+              <Typography variant="caption" color="textSecondary">({user.roleName})</Typography>
+            </>
           )}
         </Box>
         <Box display="flex" gap={1}>
