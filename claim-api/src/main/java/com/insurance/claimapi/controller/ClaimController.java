@@ -85,7 +85,7 @@ public class ClaimController {
         return ResponseEntity.ok(ApiResponse.success(claim, "Claim retrieved successfully"));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADJUSTER', 'ADMIN')")
     @Operation(summary = "Get all claims", description = "Get all claims with optional filters (Admin/Adjuster only)")
     public ResponseEntity<ApiResponse<List<ClaimDto>>> getAllClaims(
