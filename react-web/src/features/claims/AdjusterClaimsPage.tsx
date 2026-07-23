@@ -20,6 +20,7 @@ const AdjusterClaimsPage: React.FC = () => {
   const navigate = useNavigate();
   const [claims, setClaims] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState<any>(null);
   const [action, setAction] = useState<'APPROVED' | 'REJECTED' | null>(null);
@@ -35,8 +36,8 @@ const AdjusterClaimsPage: React.FC = () => {
     try {
       const res = await claimService.getAllClaims();
       setClaims(res.data.data || []);
-    } catch (err) {
-      console.error('Failed to load claims:', err);
+    } catch (err: any) {
+      setLoadError(err.response?.data?.message || err.message || 'Failed to load claims');
     } finally {
       setLoading(false);
     }
@@ -70,6 +71,7 @@ const AdjusterClaimsPage: React.FC = () => {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">All Claims (Adjuster View)</Typography>
+        {loadError && <Alert severity="error">{loadError}</Alert>}
         <Button variant="text" onClick={() => navigate('/dashboard')}>Dashboard</Button>
         <Button variant="outlined" onClick={() => navigate('/claims')}>
           My Claims
