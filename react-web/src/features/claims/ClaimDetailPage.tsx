@@ -103,12 +103,9 @@ const ClaimDetailPage: React.FC = () => {
           )}
         </Grid>
 
-        <Box mt={3}>
-          <Chip
-            label="Back to Claims"
-            onClick={() => navigate('/claims')}
-            clickable
-          />
+        <Box mt={3} display="flex" gap={1}>
+          <Chip label="Dashboard" onClick={() => navigate('/dashboard')} clickable />
+          <Chip label="Back to Claims" onClick={() => navigate('/claims')} clickable />
         </Box>
       </Paper>
     </Box>

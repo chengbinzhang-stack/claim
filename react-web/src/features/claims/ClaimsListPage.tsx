@@ -38,9 +38,12 @@ const ClaimsListPage: React.FC = () => {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">My Claims</Typography>
-        <Button variant="contained" onClick={() => navigate('/claims/new')}>
+        <Box display="flex" gap={1}>
+          <Button variant="text" onClick={() => navigate('/dashboard')}>Dashboard</Button>
+          <Button variant="contained" onClick={() => navigate('/claims/new')}>
           Submit New Claim
         </Button>
+        </Box>
       </Box>
 
       <TableContainer component={Paper}>

@@ -70,6 +70,7 @@ const AdjusterClaimsPage: React.FC = () => {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">All Claims (Adjuster View)</Typography>
+        <Button variant="text" onClick={() => navigate('/dashboard')}>Dashboard</Button>
         <Button variant="outlined" onClick={() => navigate('/claims')}>
           My Claims
         </Button>
