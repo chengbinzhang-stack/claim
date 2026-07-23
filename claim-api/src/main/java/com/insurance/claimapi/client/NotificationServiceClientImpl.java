@@ -5,6 +5,7 @@ import com.insurance.claimapi.service.NotificationServiceClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class NotificationServiceClientImpl implements NotificationServiceClient {
 
     @Override
+    @Async("emailExecutor")
     @CircuitBreaker(name = "notificationService", fallbackMethod = "sendEmailFallback")
     @Retry(name = "notificationService")
     public void sendEmail(EmailRequest request) {
