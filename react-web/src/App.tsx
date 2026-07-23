@@ -9,19 +9,28 @@ import ClaimDetailPage from './features/claims/ClaimDetailPage';
 import AdjusterClaimsPage from './features/claims/AdjusterClaimsPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 
-const getUserRole = (): string | null => {
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return null;
-  try { return JSON.parse(userStr).roleName || null; } catch { return null; }
-};
-
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('token');
   return token ? <>{children}</> : <Navigate to="/login" />;
 };
 
 const App: React.FC = () => {
-  const role = getUserRole();
+  const [role, setRole] = React.useState<string | null>(() => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try { return JSON.parse(userStr).roleName || null; } catch { return null; }
+  });
+
+  // Keep role in sync with localStorage changes (e.g., login/logout)
+  React.useEffect(() => {
+    const updateRole = () => {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) { setRole(null); return; }
+      try { setRole(JSON.parse(userStr).roleName || null); } catch { setRole(null); }
+    };
+    window.addEventListener('storage', updateRole);
+    return () => window.removeEventListener('storage', updateRole);
+  }, []);
 
   return (
     <BrowserRouter>

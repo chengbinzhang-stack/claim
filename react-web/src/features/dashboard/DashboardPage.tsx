@@ -4,17 +4,15 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { dashboardService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
-const getUserRole = (): string | null => {
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return null;
-  try { return JSON.parse(userStr).roleName || null; } catch { return null; }
-};
-
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const role = getUserRole();
+  const [role, setRole] = useState<string | null>(() => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try { return JSON.parse(userStr).roleName || null; } catch { return null; }
+  });
 
   useEffect(() => {
     loadStats();
