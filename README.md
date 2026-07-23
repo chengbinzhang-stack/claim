@@ -120,3 +120,9 @@ Swagger UI available at:
 ##Integration test
 cd c:\Users\85007\claim\insurance-demo\claim-api
 mvn test -Dtest=ClaimControllerIntegrationTest -Dspring.profiles.active=test
+mvn clean compile
+参数	作用
+-Dtest=xxx	只跑指定的测试类
+-DfailIfNoTests=false	找不到时不报错
+-DskipTests	跳过所有测试（不跑）
+-Dmaven.test.failure.ignore=true	测试失败了也继续构建

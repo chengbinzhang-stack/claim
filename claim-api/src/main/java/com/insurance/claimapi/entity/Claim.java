@@ -70,7 +70,8 @@ public class Claim {
     private LocalDateTime createdAt;
 
     @Version
-    private Long version;
+    @Builder.Default
+    private Long version = 0L;
 
     @LastModifiedDate
     @Column(name = "updated_at")
