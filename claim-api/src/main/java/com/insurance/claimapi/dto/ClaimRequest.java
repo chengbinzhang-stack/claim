@@ -33,5 +33,7 @@ public class ClaimRequest {
     @DecimalMax(value = "999999999.99", message = "Amount exceeds maximum limit")
     private BigDecimal amount;
 
+    private String requestId;
+
     private List<AttachmentDto> attachments;
 }

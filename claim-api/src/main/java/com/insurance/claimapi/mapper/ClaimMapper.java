@@ -20,6 +20,7 @@ public interface ClaimMapper {
     @Mapping(target = "submittedByEmail", source = "submittedBy.email")
     @Mapping(target = "reviewedByName", source = "reviewedBy.fullName")
     @Mapping(target = "attachments", source = "attachments")
+    @Mapping(target = "version", source = "version")
     ClaimDto toDto(Claim claim);
 
     List<ClaimDto> toDtoList(List<Claim> claims);

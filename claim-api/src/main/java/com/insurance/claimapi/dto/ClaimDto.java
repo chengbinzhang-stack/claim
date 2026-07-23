@@ -30,4 +30,5 @@ public class ClaimDto {
     private List<AttachmentDto> attachments;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long version;
 }

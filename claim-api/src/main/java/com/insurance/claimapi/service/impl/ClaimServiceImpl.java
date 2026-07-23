@@ -6,6 +6,7 @@ import com.insurance.claimapi.exception.*;
 import com.insurance.claimapi.mapper.ClaimMapper;
 import com.insurance.claimapi.repository.*;
 import com.insurance.claimapi.service.ClaimService;
+import com.insurance.claimapi.service.IdempotencyService;
 import com.insurance.claimapi.service.NotificationServiceClient;
 import com.insurance.claimapi.service.PolicyServiceClient;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,20 @@ public class ClaimServiceImpl implements ClaimService {
     private final ClaimMapper claimMapper;
     private final PolicyServiceClient policyServiceClient;
     private final NotificationServiceClient notificationServiceClient;
+    private final IdempotencyService idempotencyService;
 
     @Override
     @Transactional
     public ClaimDto submitClaim(ClaimRequest request, Long userId) {
+        // Idempotency check
+        if (request.getRequestId() != null) {
+            Object cached = idempotencyService.getIfPresent(request.getRequestId());
+            if (cached != null) {
+                log.info("Duplicate request detected, returning cached result for requestId: {}", request.getRequestId());
+                return (ClaimDto) cached;
+            }
+        }
+
         log.info("Submitting new claim for user: {}, policy: {}", userId, request.getPolicyNumber());
 
         // Validate policy via Policy Service
@@ -76,6 +87,13 @@ public class ClaimServiceImpl implements ClaimService {
         Claim savedClaim = claimRepository.save(claim);
         log.info("Claim submitted successfully: {}", savedClaim.getClaimNumber());
 
+        ClaimDto result = claimMapper.toDto(savedClaim);
+
+        // Cache result for idempotency
+        if (request.getRequestId() != null) {
+            idempotencyService.put(request.getRequestId(), result);
+        }
+
         // Send notification
         try {
             sendClaimNotification(user, savedClaim, "CLAIM_SUBMITTED");
@@ -83,7 +101,7 @@ public class ClaimServiceImpl implements ClaimService {
             log.error("Failed to send notification for claim: {}", savedClaim.getClaimNumber(), e);
         }
 
-        return claimMapper.toDto(savedClaim);
+        return result;
     }
 
     @Override

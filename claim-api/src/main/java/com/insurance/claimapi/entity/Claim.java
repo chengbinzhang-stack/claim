@@ -69,6 +69,9 @@ public class Claim {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Version
+    private Long version;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
