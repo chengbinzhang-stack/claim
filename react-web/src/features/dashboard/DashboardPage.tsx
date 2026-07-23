@@ -43,11 +43,15 @@ const DashboardPage: React.FC = () => {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">Dashboard</Typography>
-        {(role === 'ADJUSTER' || role === 'ADMIN') && (
-          <Button variant="outlined" onClick={() => navigate('/adjuster/claims')}>
-            Adjuster View
-          </Button>
-        )}
+        <Box display="flex" gap={1}>
+          <Button variant="outlined" onClick={() => navigate('/claims')}>My Claims</Button>
+          <Button variant="contained" onClick={() => navigate('/claims/new')}>Submit Claim</Button>
+          {(role === 'ADJUSTER' || role === 'ADMIN') && (
+            <Button variant="outlined" color="warning" onClick={() => navigate('/adjuster/claims')}>
+              Adjuster View
+            </Button>
+          )}
+        </Box>
       </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={3}>
