@@ -209,9 +209,13 @@ export default function App() {
   }
 
   if (!isLoggedIn) {
-    return <LoginScreen onLogin={() => {
-      AsyncStorage.getItem('user').then(u => { if (u) setUser(JSON.parse(u)); });
-      AsyncStorage.getItem('token').then(t => { if (t) setToken(t); });
+    return <LoginScreen onLogin={async () => {
+      const [savedToken, userStr] = await Promise.all([
+        AsyncStorage.getItem('token'),
+        AsyncStorage.getItem('user'),
+      ]);
+      if (savedToken) setToken(savedToken);
+      if (userStr) setUser(JSON.parse(userStr));
       setIsLoggedIn(true);
     }} />;
   }
